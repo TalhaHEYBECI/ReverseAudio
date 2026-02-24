@@ -11,7 +11,7 @@ import SwiftUI
 struct ReverseAudioApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ReverseAudioDemoView()
         }
     }
 }
