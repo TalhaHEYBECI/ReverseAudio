@@ -11,15 +11,24 @@ enum ReverseAudioError: Error, LocalizedError {
     var errorDescription: String? {
         switch self {
         case .permissionDenied:
-            return "Microphone access is denied. Please enable it from Settings."
+            return NSLocalizedString("error.permissionDenied", comment: "Microphone permission denied error")
         case let .recordingFailed(reason):
-            return "Recording failed: \(reason)"
+            return String(
+                format: NSLocalizedString("error.recordingFailedFormat", comment: "Recording failure with reason"),
+                reason
+            )
         case let .processingFailed(reason):
-            return "Processing failed: \(reason)"
+            return String(
+                format: NSLocalizedString("error.processingFailedFormat", comment: "Processing failure with reason"),
+                reason
+            )
         case let .exportFailed(reason):
-            return "Export failed: \(reason)"
+            return String(
+                format: NSLocalizedString("error.exportFailedFormat", comment: "Export failure with reason"),
+                reason
+            )
         case .invalidInput:
-            return "Invalid audio input."
+            return NSLocalizedString("error.invalidInput", comment: "Invalid input error")
         }
     }
 }

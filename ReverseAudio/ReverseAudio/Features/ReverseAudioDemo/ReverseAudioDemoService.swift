@@ -41,12 +41,16 @@ final class ReverseAudioService: NSObject, AVAudioRecorderDelegate, ReverseAudio
         let recorder = try AVAudioRecorder(url: url, settings: settings)
         recorder.delegate = self
         guard recorder.prepareToRecord() else {
-            throw ReverseAudioError.recordingFailed("Recorder prepare failed")
+            throw ReverseAudioError.recordingFailed(
+                NSLocalizedString("errorReason.recorderPrepareFailed", comment: "Recorder preparation failed")
+            )
         }
 
         let cappedDuration = min(maxDuration, 15)
         guard recorder.record(forDuration: cappedDuration) else {
-            throw ReverseAudioError.recordingFailed("Could not start recording")
+            throw ReverseAudioError.recordingFailed(
+                NSLocalizedString("errorReason.recordStartFailed", comment: "Could not start recording")
+            )
         }
 
         self.recorder = recorder
@@ -58,10 +62,14 @@ final class ReverseAudioService: NSObject, AVAudioRecorderDelegate, ReverseAudio
         }
 
         guard let recordingURL else {
-            throw ReverseAudioError.recordingFailed("No recording URL")
+            throw ReverseAudioError.recordingFailed(
+                NSLocalizedString("errorReason.recordingURLMissing", comment: "Missing recording URL")
+            )
         }
         guard fileManager.fileExists(atPath: recordingURL.path) else {
-            throw ReverseAudioError.recordingFailed("Recording missing")
+            throw ReverseAudioError.recordingFailed(
+                NSLocalizedString("errorReason.recordingFileMissing", comment: "Recording file missing")
+            )
         }
 
         let file = try AVAudioFile(forReading: recordingURL)
@@ -142,7 +150,9 @@ final class ReverseAudioService: NSObject, AVAudioRecorderDelegate, ReverseAudio
                     pcmFormat: format,
                     frameCapacity: AVAudioFrameCount(frameCount)
                 ) else {
-                    throw ReverseAudioError.processingFailed("Failed to allocate buffer")
+                    throw ReverseAudioError.processingFailed(
+                        NSLocalizedString("errorReason.bufferAllocationFailed", comment: "Failed to allocate buffer")
+                    )
                 }
 
                 try inputFile.read(into: buffer, frameCount: AVAudioFrameCount(frameCount))
@@ -164,7 +174,9 @@ final class ReverseAudioService: NSObject, AVAudioRecorderDelegate, ReverseAudio
 
         let asset = AVURLAsset(url: inputURL)
         guard let exporter = AVAssetExportSession(asset: asset, presetName: AVAssetExportPresetAppleM4A) else {
-            throw ReverseAudioError.exportFailed("Export session unavailable")
+            throw ReverseAudioError.exportFailed(
+                NSLocalizedString("errorReason.exportSessionUnavailable", comment: "Export session unavailable")
+            )
         }
 
         exporter.outputURL = outputURL
@@ -177,11 +189,23 @@ final class ReverseAudioService: NSObject, AVAudioRecorderDelegate, ReverseAudio
                 case .completed:
                     continuation.resume(returning: ())
                 case .failed:
-                    continuation.resume(throwing: exporter.error ?? ReverseAudioError.exportFailed("Unknown export failure"))
+                    continuation.resume(
+                        throwing: exporter.error ?? ReverseAudioError.exportFailed(
+                            NSLocalizedString("errorReason.exportUnknownFailure", comment: "Unknown export failure")
+                        )
+                    )
                 case .cancelled:
-                    continuation.resume(throwing: ReverseAudioError.exportFailed("Export cancelled"))
+                    continuation.resume(
+                        throwing: ReverseAudioError.exportFailed(
+                            NSLocalizedString("errorReason.exportCancelled", comment: "Export cancelled")
+                        )
+                    )
                 default:
-                    continuation.resume(throwing: ReverseAudioError.exportFailed("Unexpected export status"))
+                    continuation.resume(
+                        throwing: ReverseAudioError.exportFailed(
+                            NSLocalizedString("errorReason.exportUnexpectedStatus", comment: "Unexpected export status")
+                        )
+                    )
                 }
             }
         }

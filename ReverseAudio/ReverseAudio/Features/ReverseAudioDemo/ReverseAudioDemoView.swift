@@ -16,7 +16,7 @@ struct ReverseAudioDemoView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Reverse Audio Demo")
+            .navigationTitle(Text("onboarding.demo.navTitle"))
         }
         .sheet(isPresented: $isSharePresented) {
             if let url = shareURL {
@@ -30,9 +30,9 @@ struct ReverseAudioDemoView: View {
         switch viewModel.status {
         case .permissionDenied:
             VStack(alignment: .leading, spacing: 8) {
-                Text("Microphone access is required.")
+                Text("onboarding.demo.permissionRequired")
                     .font(.headline)
-                Button("Open Settings") {
+                Button("onboarding.demo.openSettingsButton") {
                     guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
                     UIApplication.shared.open(url)
                 }
@@ -41,33 +41,33 @@ struct ReverseAudioDemoView: View {
         case .processing:
             HStack(spacing: 12) {
                 ProgressView()
-                Text("Processing reverse audio...")
+                Text("onboarding.demo.processing")
             }
             .padding(12)
             .background(Color(.secondarySystemBackground))
             .clipShape(RoundedRectangle(cornerRadius: 12))
         case let .error(message):
             VStack(alignment: .leading, spacing: 8) {
-                Text("Error")
+                Text("onboarding.demo.errorTitle")
                     .font(.headline)
                     .foregroundStyle(.red)
                 Text(message)
                     .font(.subheadline)
-                Button("Retry") {
+                Button("onboarding.demo.retryButton") {
                     viewModel.retryFromError()
                 }
                 .buttonStyle(.bordered)
             }
         case .ready:
-            Text("Ready: Reversed audio generated.")
+            Text("onboarding.demo.ready")
                 .font(.subheadline)
                 .foregroundStyle(.green)
         case .recording:
-            Text("Recording in progress (max 15s)")
+            Text("onboarding.demo.recordingInProgress")
                 .font(.subheadline)
                 .foregroundStyle(.orange)
         case .idle:
-            Text("Record a clip, reverse it, and share it.")
+            Text("onboarding.demo.idle")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
@@ -78,14 +78,14 @@ struct ReverseAudioDemoView: View {
             Button {
                 Task { await viewModel.toggleRecording() }
             } label: {
-                Text(viewModel.status == .recording ? "Stop" : "Record")
+                Text(viewModel.status == .recording ? "onboarding.demo.stopButton" : "onboarding.demo.recordButton")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .tint(viewModel.status == .recording ? .red : .blue)
             .disabled(viewModel.isProcessing)
 
-            Button("Reverse") {
+            Button("onboarding.demo.reverseButton") {
                 Task { await viewModel.reverse() }
             }
             .frame(maxWidth: .infinity)
@@ -93,20 +93,20 @@ struct ReverseAudioDemoView: View {
             .disabled(!viewModel.canReverse)
 
             HStack {
-                Button(viewModel.isPlayingOriginal ? "Pause Original" : "Play Original") {
+                Button(viewModel.isPlayingOriginal ? "onboarding.demo.pauseOriginalButton" : "onboarding.demo.playOriginalButton") {
                     viewModel.toggleOriginalPlayback()
                 }
                 .buttonStyle(.bordered)
                 .disabled(viewModel.originalURL == nil || viewModel.isProcessing)
 
-                Button(viewModel.isPlayingReversed ? "Pause Reversed" : "Play Reversed") {
+                Button(viewModel.isPlayingReversed ? "onboarding.demo.pauseReversedButton" : "onboarding.demo.playReversedButton") {
                     viewModel.toggleReversedPlayback()
                 }
                 .buttonStyle(.bordered)
                 .disabled(viewModel.reversedURL == nil || viewModel.isProcessing)
             }
 
-            Button("Share Reversed") {
+            Button("onboarding.demo.shareReversedButton") {
                 if let reversed = viewModel.reversedURL {
                     shareURL = reversed
                     isSharePresented = true
@@ -122,17 +122,32 @@ struct ReverseAudioDemoView: View {
     private var infoView: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let original = viewModel.originalURL {
-                Text("Original: \(original.lastPathComponent)")
+                Text(
+                    String.localizedStringWithFormat(
+                        NSLocalizedString("onboarding.demo.originalFileFormat", comment: "Original file name"),
+                        original.lastPathComponent
+                    )
+                )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
             if let reversed = viewModel.reversedURL {
-                Text("Reversed: \(reversed.lastPathComponent)")
+                Text(
+                    String.localizedStringWithFormat(
+                        NSLocalizedString("onboarding.demo.reversedFileFormat", comment: "Reversed file name"),
+                        reversed.lastPathComponent
+                    )
+                )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
             if let ms = viewModel.processingMs {
-                Text("Processing time: \(ms) ms")
+                Text(
+                    String.localizedStringWithFormat(
+                        NSLocalizedString("onboarding.demo.processingTimeFormat", comment: "Processing duration in milliseconds"),
+                        ms
+                    )
+                )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
